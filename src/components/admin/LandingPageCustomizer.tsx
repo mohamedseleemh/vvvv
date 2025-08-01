@@ -138,8 +138,10 @@ const LandingPageCustomizer: React.FC = () => {
           {[
             { id: 'hero', name: 'القسم الرئيسي', icon: Layout },
             { id: 'global', name: 'الإعدادات العامة', icon: Settings },
+            { id: 'builder', name: 'محرر الصفحة', icon: Code },
             { id: 'sections', name: 'ترتيب الأقسام', icon: Move },
             { id: 'features', name: 'المميزات', icon: Sparkles },
+            { id: 'code', name: 'الكود المخصص', icon: Type },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -812,7 +814,7 @@ const LandingPageCustomizer: React.FC = () => {
           {activeTab === 'sections' && (
             <div className="space-y-4">
               <h3 className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                معاينة ��رتيب الأقسام
+                معاينة ترتيب الأقسام
               </h3>
               <div className="space-y-2">
                 {[
