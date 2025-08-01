@@ -728,3 +728,5 @@ const PaymentMethodForm: React.FC<PaymentMethodFormProps> = ({ method, onSave, o
     </form>
   );
 };
+
+export default PaymentMethodsManager;
