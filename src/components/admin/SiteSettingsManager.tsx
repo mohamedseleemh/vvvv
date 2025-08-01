@@ -143,7 +143,7 @@ export const SiteSettingsManager: React.FC = () => {
           
           seo: {
             title: 'KYCtrust - خدمات التحقق من الهوية',
-            description: 'منصة متخصصة في تقديم خدمات التحقق من الهوية وحلول KYC المبتكرة للشركات والأفراد',
+            description: 'منصة متخصصة في تقديم خدمات ا��تحقق من الهوية وحلول KYC المبتكرة للشركات والأفراد',
             keywords: 'KYC, التحقق من الهوية, خدمات رقمية, أمان, مصادقة',
             favicon: '/favicon.ico',
             ogImage: ''
@@ -786,7 +786,7 @@ export const SiteSettingsManager: React.FC = () => {
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    مهلة انتهاء الجلسة (دقيقة)
+                    مهلة انتهاء الجلسة (دق��قة)
                   </label>
                   <input
                     type="number"
@@ -902,3 +902,5 @@ export const SiteSettingsManager: React.FC = () => {
     </div>
   );
 };
+
+export default SiteSettingsManager;
