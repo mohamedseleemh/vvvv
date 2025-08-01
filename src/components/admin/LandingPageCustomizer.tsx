@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import { Save, Eye, Settings, Palette, Type, Layout, Image, Sparkles, Move, Plus, Trash2, Edit2 } from 'lucide-react';
+import { Save, Eye, Settings, Palette, Type, Layout, Image, Sparkles, Move, Plus, Trash2, Edit2, Code, Monitor } from 'lucide-react';
 import { useCustomization } from '../../context/CustomizationContext';
 import { useTheme } from '../../context/ThemeContext';
 import LoadingSpinner from '../ui/LoadingSpinner';
 import ErrorMessage from '../ui/ErrorMessage';
+import PageBuilder from './VisualEditor/PageBuilder';
+import LivePreview from './VisualEditor/LivePreview';
 import toast from 'react-hot-toast';
 
 const LandingPageCustomizer: React.FC = () => {
@@ -77,7 +79,7 @@ const LandingPageCustomizer: React.FC = () => {
   ];
 
   if (loading) {
-    return <LoadingSpinner size="lg" text="جاري تحميل إعدادات التخصيص..." />;
+    return <LoadingSpinner size="lg" text="جاري تحميل إعدادات التخ��يص..." />;
   }
 
   if (error) {
@@ -280,7 +282,7 @@ const LandingPageCustomizer: React.FC = () => {
                         ? 'bg-gray-700 border-gray-600 text-white'
                         : 'bg-white border-gray-300 text-gray-900'
                     }`}
-                    placeholder="منصة رائدة في الخدمات المالية"
+                    placeholder="منصة رائدة في ا��خدمات المالية"
                   />
                 </div>
 
