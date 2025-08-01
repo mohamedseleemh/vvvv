@@ -257,7 +257,7 @@ const StyleEditor: React.FC<StyleEditorProps> = ({ element, theme, onUpdateEleme
                 className="flex items-center justify-between w-full py-2 text-left"
               >
                 <div className="flex items-center space-x-2">
-                  <BorderAll className="h-4 w-4" />
+                  <Square className="h-4 w-4" />
                   <span className="font-medium">Border & Radius</span>
                 </div>
                 {expandedSections.has('border') ? (
