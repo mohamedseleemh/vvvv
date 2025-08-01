@@ -116,6 +116,14 @@ const LandingPageCustomizer: React.FC = () => {
           </button>
           
           <button
+            onClick={() => setIsLivePreviewOpen(true)}
+            className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-6 py-2 rounded-xl font-semibold hover:shadow-lg transition-all duration-300 flex items-center space-x-reverse space-x-2"
+          >
+            <Monitor className="h-4 w-4" />
+            <span>معاينة مباشرة</span>
+          </button>
+
+          <button
             onClick={() => window.open('/', '_blank')}
             className="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-6 py-2 rounded-xl font-semibold hover:shadow-lg transition-all duration-300"
           >
@@ -381,7 +389,7 @@ const LandingPageCustomizer: React.FC = () => {
                   className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg transition-all duration-300 flex items-center justify-center space-x-reverse space-x-2"
                 >
                   <Save className="h-5 w-5" />
-                  <span>حفظ إعدادا�� القسم الرئيسي</span>
+                  <span>حفظ إعدادات القسم الرئيسي</span>
                 </button>
               </div>
             </div>
@@ -804,7 +812,7 @@ const LandingPageCustomizer: React.FC = () => {
           {activeTab === 'sections' && (
             <div className="space-y-4">
               <h3 className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                معاينة ترتيب الأقسام
+                معاينة ��رتيب الأقسام
               </h3>
               <div className="space-y-2">
                 {[
