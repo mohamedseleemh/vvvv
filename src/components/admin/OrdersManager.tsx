@@ -543,7 +543,7 @@ export const OrdersManager: React.FC = () => {
                   <div className="space-y-2 text-sm">
                     <div className="flex items-center">
                       <User className="h-4 w-4 text-gray-400 mr-2" />
-                      <span>{selectedOrder.customerName || 'غير محدد'}</span>
+                      <span>{selectedOrder.customerName || 'غير مح��د'}</span>
                     </div>
                     <div className="flex items-center">
                       <Mail className="h-4 w-4 text-gray-400 mr-2" />
@@ -590,3 +590,5 @@ export const OrdersManager: React.FC = () => {
     </div>
   );
 };
+
+export default OrdersManager;
