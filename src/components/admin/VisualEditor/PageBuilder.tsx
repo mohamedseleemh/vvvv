@@ -300,7 +300,7 @@ const PageBuilder: React.FC = () => {
       await publishPage();
       toast.success('تم نشر الصفحة بنجاح! ستظهر التغييرات في الصفحة الرئيسية');
     } catch (error) {
-      toast.error('فشل في نشر الصفحة');
+      toast.error('فشل في نشر ��لصفحة');
     }
   }, [publishPage]);
 
@@ -432,10 +432,18 @@ const PageBuilder: React.FC = () => {
               />
 
               <button
-                onClick={publishPage}
-                className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+                onClick={handlePublishPage}
+                disabled={loading}
+                className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
               >
-                Publish
+                {loading ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>Publishing...</span>
+                  </>
+                ) : (
+                  <span>Publish Page</span>
+                )}
               </button>
             </div>
           </div>
