@@ -286,23 +286,23 @@ const PageBuilder: React.FC = () => {
     }
   }, [history, historyIndex]);
 
-  const saveLayout = useCallback(() => {
-    const layoutData = {
-      elements,
-      theme: currentTheme,
-      lastUpdated: new Date().toISOString()
-    };
-    
-    localStorage.setItem('page-builder-layout', JSON.stringify(layoutData));
-    
-    // TODO: Save to database
-    console.log('Layout saved:', layoutData);
-  }, [elements, currentTheme]);
+  const saveLayout = useCallback(async () => {
+    try {
+      await updatePageElements(elements);
+      toast.success('تم حفظ التخطيط بنجاح');
+    } catch (error) {
+      toast.error('فشل في حفظ التخطيط');
+    }
+  }, [elements, updatePageElements]);
 
-  const publishPage = useCallback(() => {
-    // TODO: Implement publish functionality
-    console.log('Publishing page...', elements);
-  }, [elements]);
+  const handlePublishPage = useCallback(async () => {
+    try {
+      await publishPage();
+      toast.success('تم نشر الصفحة بنجاح! ستظهر التغييرات في الصفحة الرئيسية');
+    } catch (error) {
+      toast.error('فشل في نشر الصفحة');
+    }
+  }, [publishPage]);
 
   if (isPreviewMode) {
     return (
