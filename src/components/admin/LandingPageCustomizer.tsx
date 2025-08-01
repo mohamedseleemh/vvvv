@@ -67,7 +67,7 @@ const LandingPageCustomizer: React.FC = () => {
       root.style.setProperty('--secondary-color', globalForm.secondaryColor);
       root.style.setProperty('--accent-color', globalForm.accentColor);
     } catch (error) {
-      toast.error('فشل في حفظ الإعدادات');
+      toast.error('فشل في حفظ ��لإعدادات');
     }
   };
 
@@ -625,7 +625,7 @@ const LandingPageCustomizer: React.FC = () => {
                         ? 'bg-gray-700 border-gray-600 text-white'
                         : 'bg-white border-gray-300 text-gray-900'
                     }`}
-                    placeholder="/* أضف CSS مخصص هنا */
+                    placeholder="/* أ��ف CSS مخصص هنا */
 .custom-class {
   background: linear-gradient(45deg, #667eea, #764ba2);
   border-radius: 10px;
@@ -948,7 +948,7 @@ document.addEventListener('DOMContentLoaded', function() {
               </h3>
               <div className="grid grid-cols-2 gap-4">
                 {[
-                  { icon: '🛡️', title: 'أمان متقدم' },
+                  { icon: '🛡️', title: 'أمان متقد��' },
                   { icon: '⚡', title: 'سرعة البرق' },
                   { icon: '🏆', title: 'موثوقية عالية' },
                   { icon: '🌍', title: 'تغطية عالمية' }
@@ -965,6 +965,12 @@ document.addEventListener('DOMContentLoaded', function() {
           )}
         </div>
       </div>
+
+      {/* Live Preview Modal */}
+      <LivePreview
+        isOpen={isLivePreviewOpen}
+        onClose={() => setIsLivePreviewOpen(false)}
+      />
     </div>
   );
 };
