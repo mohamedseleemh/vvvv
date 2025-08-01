@@ -1,5 +1,6 @@
 /* استيراد التحسينات المخصصة */
 @import './styles/custom.css';
+@import './styles/page-builder.css';
 
 @tailwind base;
 @tailwind components;

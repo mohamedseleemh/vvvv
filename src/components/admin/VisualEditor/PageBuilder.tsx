@@ -7,11 +7,13 @@ import {
   Video, Quote, Star, CreditCard, Users, Calendar
 } from 'lucide-react';
 import { useTheme } from '../../../context/ThemeContext';
+import { useCustomization } from '../../../context/CustomizationContext';
 import DragDropCanvas from './DragDropCanvas';
 import ComponentLibrary from './ComponentLibrary';
 import StyleEditor from './StyleEditor';
 import ThemeSelector from './ThemeSelector';
 import PreviewMode from './PreviewMode';
+import toast from 'react-hot-toast';
 
 export interface PageElement {
   id: string;
@@ -53,7 +55,17 @@ export interface PageTheme {
 
 const PageBuilder: React.FC = () => {
   const { theme } = useTheme();
-  const [elements, setElements] = useState<PageElement[]>([]);
+  const {
+    customization,
+    updatePageElements,
+    addPageElement,
+    updatePageElement,
+    deletePageElement,
+    publishPage,
+    loading
+  } = useCustomization();
+
+  const [elements, setElements] = useState<PageElement[]>(customization.pageElements || []);
   const [selectedElement, setSelectedElement] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
   const [isPreviewMode, setIsPreviewMode] = useState(false);
@@ -61,6 +73,11 @@ const PageBuilder: React.FC = () => {
   const [history, setHistory] = useState<PageElement[][]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const canvasRef = useRef<HTMLDivElement>(null);
+
+  // Sync elements with customization context
+  React.useEffect(() => {
+    setElements(customization.pageElements || []);
+  }, [customization.pageElements]);
 
   // Built-in themes
   const themes: PageTheme[] = [
@@ -185,7 +202,7 @@ const PageBuilder: React.FC = () => {
     }
   ];
 
-  const addElement = useCallback((template: typeof componentTemplates[0]) => {
+  const addElement = useCallback(async (template: typeof componentTemplates[0]) => {
     const newElement: PageElement = {
       id: `element-${Date.now()}`,
       type: template.type,
@@ -193,31 +210,45 @@ const PageBuilder: React.FC = () => {
       size: { width: 800, height: 400 },
       content: template.defaultContent,
       styles: {
-        backgroundColor: currentTheme?.colors.background || '#ffffff',
+        backgroundColor: currentTheme?.colors.background || customization.globalSettings.primaryColor || '#ffffff',
         textColor: currentTheme?.colors.text || '#000000',
         borderRadius: 8,
         padding: 24,
         margin: 16
       },
-      visible: true
+      visible: true,
+      order: elements.length
     };
 
-    setElements(prev => [...prev, newElement]);
-    saveToHistory([...elements, newElement]);
-  }, [elements, currentTheme]);
-
-  const updateElement = useCallback((id: string, updates: Partial<PageElement>) => {
-    setElements(prev => prev.map(el => 
-      el.id === id ? { ...el, ...updates } : el
-    ));
-  }, []);
-
-  const deleteElement = useCallback((id: string) => {
-    setElements(prev => prev.filter(el => el.id !== id));
-    if (selectedElement === id) {
-      setSelectedElement(null);
+    try {
+      await addPageElement(newElement);
+      saveToHistory([...elements, newElement]);
+      toast.success('تم إضافة العنصر بنجاح');
+    } catch (error) {
+      toast.error('فشل في إضافة العنصر');
     }
-  }, [selectedElement]);
+  }, [elements, currentTheme, customization, addPageElement]);
+
+  const updateElement = useCallback(async (id: string, updates: Partial<PageElement>) => {
+    try {
+      await updatePageElement(id, updates);
+      toast.success('تم تحديث العنصر بنجاح');
+    } catch (error) {
+      toast.error('فشل في تحديث العنصر');
+    }
+  }, [updatePageElement]);
+
+  const deleteElement = useCallback(async (id: string) => {
+    try {
+      await deletePageElement(id);
+      if (selectedElement === id) {
+        setSelectedElement(null);
+      }
+      toast.success('تم حذف العنصر بنجاح');
+    } catch (error) {
+      toast.error('فشل في حذف العنصر');
+    }
+  }, [selectedElement, deletePageElement]);
 
   const duplicateElement = useCallback((id: string) => {
     const element = elements.find(el => el.id === id);
@@ -255,23 +286,23 @@ const PageBuilder: React.FC = () => {
     }
   }, [history, historyIndex]);
 
-  const saveLayout = useCallback(() => {
-    const layoutData = {
-      elements,
-      theme: currentTheme,
-      lastUpdated: new Date().toISOString()
-    };
-    
-    localStorage.setItem('page-builder-layout', JSON.stringify(layoutData));
-    
-    // TODO: Save to database
-    console.log('Layout saved:', layoutData);
-  }, [elements, currentTheme]);
+  const saveLayout = useCallback(async () => {
+    try {
+      await updatePageElements(elements);
+      toast.success('تم حفظ التخطيط بنجاح');
+    } catch (error) {
+      toast.error('فشل في حفظ التخطيط');
+    }
+  }, [elements, updatePageElements]);
 
-  const publishPage = useCallback(() => {
-    // TODO: Implement publish functionality
-    console.log('Publishing page...', elements);
-  }, [elements]);
+  const handlePublishPage = useCallback(async () => {
+    try {
+      await publishPage();
+      toast.success('تم نشر الصفحة بنجاح! ستظهر التغييرات في الصفحة الرئيسية');
+    } catch (error) {
+      toast.error('فشل في نشر ��لصفحة');
+    }
+  }, [publishPage]);
 
   if (isPreviewMode) {
     return (
@@ -401,10 +432,18 @@ const PageBuilder: React.FC = () => {
               />
 
               <button
-                onClick={publishPage}
-                className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+                onClick={handlePublishPage}
+                disabled={loading}
+                className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
               >
-                Publish
+                {loading ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>Publishing...</span>
+                  </>
+                ) : (
+                  <span>Publish Page</span>
+                )}
               </button>
             </div>
           </div>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { 
-  Palette, Type, Layout, Spacing, BorderAll, Eye, 
+import {
+  Palette, Type, Layout, Move, Square, Eye,
   ChevronDown, ChevronRight, Settings, Brush, Box
 } from 'lucide-react';
 import { PageElement, PageTheme } from './PageBuilder';
@@ -257,7 +257,7 @@ const StyleEditor: React.FC<StyleEditorProps> = ({ element, theme, onUpdateEleme
                 className="flex items-center justify-between w-full py-2 text-left"
               >
                 <div className="flex items-center space-x-2">
-                  <BorderAll className="h-4 w-4" />
+                  <Square className="h-4 w-4" />
                   <span className="font-medium">Border & Radius</span>
                 </div>
                 {expandedSections.has('border') ? (
@@ -344,7 +344,7 @@ const StyleEditor: React.FC<StyleEditorProps> = ({ element, theme, onUpdateEleme
                 className="flex items-center justify-between w-full py-2 text-left"
               >
                 <div className="flex items-center space-x-2">
-                  <Spacing className="h-4 w-4" />
+                  <Move className="h-4 w-4" />
                   <span className="font-medium">Spacing</span>
                 </div>
                 {expandedSections.has('spacing') ? (

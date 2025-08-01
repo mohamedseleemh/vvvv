@@ -1,16 +1,19 @@
 import React, { useState } from 'react';
-import { Save, Eye, Settings, Palette, Type, Layout, Image, Sparkles, Move, Plus, Trash2, Edit2 } from 'lucide-react';
+import { Save, Eye, Settings, Palette, Type, Layout, Image, Sparkles, Move, Plus, Trash2, Edit2, Code, Monitor } from 'lucide-react';
 import { useCustomization } from '../../context/CustomizationContext';
 import { useTheme } from '../../context/ThemeContext';
 import LoadingSpinner from '../ui/LoadingSpinner';
 import ErrorMessage from '../ui/ErrorMessage';
+import PageBuilder from './VisualEditor/PageBuilder';
+import LivePreview from './VisualEditor/LivePreview';
 import toast from 'react-hot-toast';
 
 const LandingPageCustomizer: React.FC = () => {
   const { customization, loading, error, updateHeroSection, updateGlobalSettings, refreshCustomization } = useCustomization();
   const { theme } = useTheme();
-  const [activeTab, setActiveTab] = useState<'hero' | 'global' | 'sections' | 'features'>('hero');
+  const [activeTab, setActiveTab] = useState<'hero' | 'global' | 'sections' | 'features' | 'builder' | 'code'>('hero');
   const [isPreviewMode, setIsPreviewMode] = useState(false);
+  const [isLivePreviewOpen, setIsLivePreviewOpen] = useState(false);
 
   const [heroForm, setHeroForm] = useState(customization?.hero || {
     title: '',
@@ -64,7 +67,7 @@ const LandingPageCustomizer: React.FC = () => {
       root.style.setProperty('--secondary-color', globalForm.secondaryColor);
       root.style.setProperty('--accent-color', globalForm.accentColor);
     } catch (error) {
-      toast.error('فشل في حفظ الإعدادات');
+      toast.error('فشل في حفظ ��لإعدادات');
     }
   };
 
@@ -113,6 +116,14 @@ const LandingPageCustomizer: React.FC = () => {
           </button>
           
           <button
+            onClick={() => setIsLivePreviewOpen(true)}
+            className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-6 py-2 rounded-xl font-semibold hover:shadow-lg transition-all duration-300 flex items-center space-x-reverse space-x-2"
+          >
+            <Monitor className="h-4 w-4" />
+            <span>معاينة مباشرة</span>
+          </button>
+
+          <button
             onClick={() => window.open('/', '_blank')}
             className="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-6 py-2 rounded-xl font-semibold hover:shadow-lg transition-all duration-300"
           >
@@ -127,8 +138,10 @@ const LandingPageCustomizer: React.FC = () => {
           {[
             { id: 'hero', name: 'القسم الرئيسي', icon: Layout },
             { id: 'global', name: 'الإعدادات العامة', icon: Settings },
+            { id: 'builder', name: 'محرر الصفحة', icon: Code },
             { id: 'sections', name: 'ترتيب الأقسام', icon: Move },
             { id: 'features', name: 'المميزات', icon: Sparkles },
+            { id: 'code', name: 'الكود المخصص', icon: Type },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -580,6 +593,115 @@ const LandingPageCustomizer: React.FC = () => {
             </div>
           )}
 
+          {/* Page Builder Tab */}
+          {activeTab === 'builder' && (
+            <div className="h-[600px]">
+              <PageBuilder />
+            </div>
+          )}
+
+          {/* Custom Code Tab */}
+          {activeTab === 'code' && (
+            <div className="space-y-6">
+              <div className="flex items-center space-x-reverse space-x-3 mb-6">
+                <Type className="h-5 w-5 text-blue-600" />
+                <h2 className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                  إدارة الكود المخصص
+                </h2>
+              </div>
+
+              <div className="space-y-6">
+                {/* Custom CSS */}
+                <div>
+                  <label className={`block text-sm font-medium mb-3 ${
+                    theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                  }`}>
+                    CSS مخصص
+                  </label>
+                  <textarea
+                    rows={10}
+                    className={`w-full px-4 py-3 rounded-xl border font-mono text-sm ${
+                      theme === 'dark'
+                        ? 'bg-gray-700 border-gray-600 text-white'
+                        : 'bg-white border-gray-300 text-gray-900'
+                    }`}
+                    placeholder="/* أ��ف CSS مخصص هنا */
+.custom-class {
+  background: linear-gradient(45deg, #667eea, #764ba2);
+  border-radius: 10px;
+  padding: 20px;
+}
+
+.hero-custom {
+  background-image: url('your-image.jpg');
+  background-size: cover;
+}"
+                  />
+                  <p className={`text-xs mt-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                    سيتم تطبيق هذا CSS على الصفحة الرئيسية. استخدم بحذر.
+                  </p>
+                </div>
+
+                {/* Custom JavaScript */}
+                <div>
+                  <label className={`block text-sm font-medium mb-3 ${
+                    theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                  }`}>
+                    JavaScript مخصص
+                  </label>
+                  <textarea
+                    rows={8}
+                    className={`w-full px-4 py-3 rounded-xl border font-mono text-sm ${
+                      theme === 'dark'
+                        ? 'bg-gray-700 border-gray-600 text-white'
+                        : 'bg-white border-gray-300 text-gray-900'
+                    }`}
+                    placeholder="// أضف JavaScript مخصص هنا
+// تتبع Google Analytics
+gtag('config', 'GA_MEASUREMENT_ID');
+
+// تخصيصات إضافية
+document.addEventListener('DOMContentLoaded', function() {
+  // الكود هنا
+});"
+                  />
+                  <p className={`text-xs mt-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                    كود JavaScript سيتم تشغيله على الصفحة. تأكد من صحة الكود.
+                  </p>
+                </div>
+
+                {/* Meta Tags */}
+                <div>
+                  <label className={`block text-sm font-medium mb-3 ${
+                    theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                  }`}>
+                    Meta Tags إضافية
+                  </label>
+                  <textarea
+                    rows={6}
+                    className={`w-full px-4 py-3 rounded-xl border font-mono text-sm ${
+                      theme === 'dark'
+                        ? 'bg-gray-700 border-gray-600 text-white'
+                        : 'bg-white border-gray-300 text-gray-900'
+                    }`}
+                    placeholder='<!-- Meta tags إضافية -->
+<meta name="robots" content="index, follow">
+<meta name="author" content="KYCtrust">
+<meta property="og:image" content="https://your-domain.com/image.jpg">
+<meta name="twitter:card" content="summary_large_image">'
+                  />
+                  <p className={`text-xs mt-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                    Meta tags إضافية للـ SEO ووسائل التواصل الاجتماعي.
+                  </p>
+                </div>
+
+                <button className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg transition-all duration-300">
+                  حفظ الكود المخصص
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Features Tab */}
           {activeTab === 'features' && (
             <div className="space-y-6">
@@ -826,7 +948,7 @@ const LandingPageCustomizer: React.FC = () => {
               </h3>
               <div className="grid grid-cols-2 gap-4">
                 {[
-                  { icon: '🛡️', title: 'أمان متقدم' },
+                  { icon: '🛡️', title: 'أمان متقد��' },
                   { icon: '⚡', title: 'سرعة البرق' },
                   { icon: '🏆', title: 'موثوقية عالية' },
                   { icon: '🌍', title: 'تغطية عالمية' }
@@ -843,6 +965,12 @@ const LandingPageCustomizer: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Live Preview Modal */}
+      <LivePreview
+        isOpen={isLivePreviewOpen}
+        onClose={() => setIsLivePreviewOpen(false)}
+      />
     </div>
   );
 };

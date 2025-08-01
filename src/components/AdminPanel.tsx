@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Shield, Settings, Package, CreditCard, Inbox, Eye, EyeOff, Palette, Layout, TrendingUp } from 'lucide-react';
+import { Shield, Settings, Package, CreditCard, Inbox, Eye, EyeOff, Palette, Layout, TrendingUp, BarChart3, Archive, Database } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import LoginForm from './admin/LoginForm';
 import Dashboard from './admin/Dashboard';
@@ -8,10 +8,12 @@ import PaymentMethodsManager from './admin/PaymentMethodsManager';
 import OrdersManager from './admin/OrdersManager';
 import SiteSettingsManager from './admin/SiteSettingsManager';
 import LandingPageCustomizer from './admin/LandingPageCustomizer';
+import { AnalyticsPanel } from './admin/AnalyticsPanel';
+import { BackupManager } from './admin/BackupManager';
 import ThemeToggle from './ui/ThemeToggle';
 import LanguageToggle from './ui/LanguageToggle';
 
-type TabType = 'dashboard' | 'services' | 'payments' | 'orders' | 'settings' | 'customize' | 'testing';
+type TabType = 'dashboard' | 'services' | 'payments' | 'orders' | 'settings' | 'customize' | 'analytics' | 'backups' | 'testing';
 
 const AdminPanel: React.FC = () => {
   const { theme } = useTheme();
@@ -33,10 +35,12 @@ const AdminPanel: React.FC = () => {
 
   const tabs = [
     { id: 'dashboard' as TabType, name: 'لوحة التحكم', icon: Shield },
+    { id: 'orders' as TabType, name: 'إدارة الطلبات', icon: Inbox },
     { id: 'services' as TabType, name: 'إدارة الخدمات', icon: Package },
     { id: 'payments' as TabType, name: 'طرق الدفع', icon: CreditCard },
-    { id: 'orders' as TabType, name: 'الطلبات', icon: Inbox },
+    { id: 'analytics' as TabType, name: 'التحليلات والإحصائيات', icon: BarChart3 },
     { id: 'customize' as TabType, name: 'تخصيص صفحة الهبوط', icon: Palette },
+    { id: 'backups' as TabType, name: 'النسخ الاحتياطية', icon: Archive },
     { id: 'settings' as TabType, name: 'إعدادات الموقع', icon: Settings },
     { id: 'testing' as TabType, name: 'اختبار التكامل', icon: TrendingUp },
   ];
@@ -45,18 +49,22 @@ const AdminPanel: React.FC = () => {
     switch (activeTab) {
       case 'dashboard':
         return <Dashboard />;
+      case 'orders':
+        return <OrdersManager />;
       case 'services':
         return <ServicesManager />;
       case 'payments':
         return <PaymentMethodsManager />;
-      case 'orders':
-        return <OrdersManager />;
+      case 'analytics':
+        return <AnalyticsPanel />;
       case 'customize':
         return <LandingPageCustomizer />;
+      case 'backups':
+        return <BackupManager />;
       case 'settings':
         return <SiteSettingsManager />;
       case 'testing':
-        return <IntegrationTester />;
+        return <div className="text-center p-8 text-gray-500">جاري تطوير هذه الميزة</div>;
       default:
         return <Dashboard />;
     }

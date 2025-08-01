@@ -26,9 +26,38 @@ export interface GlobalSettings {
   spacing: string;
 }
 
+export interface PageElement {
+  id: string;
+  type: 'hero' | 'services' | 'features' | 'testimonials' | 'stats' | 'cta' | 'text' | 'image' | 'video' | 'form';
+  position: { x: number; y: number };
+  size: { width: number; height: number };
+  content: any;
+  styles: {
+    backgroundColor?: string;
+    textColor?: string;
+    borderRadius?: number;
+    padding?: number;
+    margin?: number;
+    animation?: string;
+    fontSize?: number;
+    fontWeight?: string;
+    borderWidth?: number;
+    borderColor?: string;
+    fontFamily?: string;
+  };
+  visible: boolean;
+  order: number;
+}
+
 export interface CustomizationData {
   hero: HeroSection;
   globalSettings: GlobalSettings;
+  pageElements: PageElement[];
+  pageLayout: {
+    sections: string[];
+    theme: string;
+    customCSS?: string;
+  };
 }
 
 interface CustomizationContextType {
@@ -37,7 +66,13 @@ interface CustomizationContextType {
   error: string | null;
   updateHeroSection: (hero: HeroSection) => Promise<void>;
   updateGlobalSettings: (settings: GlobalSettings) => Promise<void>;
+  updatePageElements: (elements: PageElement[]) => Promise<void>;
+  updatePageLayout: (layout: any) => Promise<void>;
+  addPageElement: (element: PageElement) => Promise<void>;
+  updatePageElement: (id: string, updates: Partial<PageElement>) => Promise<void>;
+  deletePageElement: (id: string) => Promise<void>;
   refreshCustomization: () => void;
+  publishPage: () => Promise<void>;
 }
 
 // Default customization data
@@ -64,6 +99,12 @@ const defaultCustomization: CustomizationData = {
     fontFamily: 'Cairo',
     borderRadius: '1rem',
     spacing: '1.5rem'
+  },
+  pageElements: [],
+  pageLayout: {
+    sections: ['hero', 'services', 'features', 'testimonials', 'faq'],
+    theme: 'modern',
+    customCSS: ''
   }
 };
 
@@ -118,8 +159,100 @@ export const CustomizationProvider: React.FC<{ children: ReactNode }> = ({ child
       setCustomization(newCustomization);
       saveToStorage(newCustomization);
       setError(null);
+
+      // Apply CSS variables to the document
+      const root = document.documentElement;
+      root.style.setProperty('--primary-color', settings.primaryColor);
+      root.style.setProperty('--secondary-color', settings.secondaryColor);
+      root.style.setProperty('--accent-color', settings.accentColor);
+      root.style.setProperty('--font-family', settings.fontFamily);
+      root.style.setProperty('--border-radius', settings.borderRadius);
+      root.style.setProperty('--spacing', settings.spacing);
+
     } catch (error) {
       const errorMessage = 'فشل في حفظ الإعدادات العامة';
+      setError(errorMessage);
+      throw new Error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updatePageElements = async (elements: PageElement[]): Promise<void> => {
+    try {
+      setLoading(true);
+      const newCustomization = { ...customization, pageElements: elements };
+      setCustomization(newCustomization);
+      saveToStorage(newCustomization);
+      setError(null);
+    } catch (error) {
+      const errorMessage = 'فشل في حفظ عناصر الصفحة';
+      setError(errorMessage);
+      throw new Error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updatePageLayout = async (layout: any): Promise<void> => {
+    try {
+      setLoading(true);
+      const newCustomization = { ...customization, pageLayout: { ...customization.pageLayout, ...layout } };
+      setCustomization(newCustomization);
+      saveToStorage(newCustomization);
+      setError(null);
+    } catch (error) {
+      const errorMessage = 'فشل في حفظ تخطيط الصفحة';
+      setError(errorMessage);
+      throw new Error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const addPageElement = async (element: PageElement): Promise<void> => {
+    try {
+      const newElements = [...customization.pageElements, element];
+      await updatePageElements(newElements);
+    } catch (error) {
+      throw new Error('فشل في إضافة الع��صر');
+    }
+  };
+
+  const updatePageElement = async (id: string, updates: Partial<PageElement>): Promise<void> => {
+    try {
+      const newElements = customization.pageElements.map(el =>
+        el.id === id ? { ...el, ...updates } : el
+      );
+      await updatePageElements(newElements);
+    } catch (error) {
+      throw new Error('فشل في تحديث العنصر');
+    }
+  };
+
+  const deletePageElement = async (id: string): Promise<void> => {
+    try {
+      const newElements = customization.pageElements.filter(el => el.id !== id);
+      await updatePageElements(newElements);
+    } catch (error) {
+      throw new Error('فشل في حذف العنصر');
+    }
+  };
+
+  const publishPage = async (): Promise<void> => {
+    try {
+      setLoading(true);
+      // Here you would typically send the data to your backend
+      localStorage.setItem('kyctrust_published_page', JSON.stringify(customization));
+
+      // Trigger a page refresh to apply changes
+      window.dispatchEvent(new CustomEvent('pagePublished', {
+        detail: customization
+      }));
+
+      setError(null);
+    } catch (error) {
+      const errorMessage = 'فشل في نشر الصفحة';
       setError(errorMessage);
       throw new Error(errorMessage);
     } finally {
@@ -149,7 +282,13 @@ export const CustomizationProvider: React.FC<{ children: ReactNode }> = ({ child
     error,
     updateHeroSection,
     updateGlobalSettings,
-    refreshCustomization
+    updatePageElements,
+    updatePageLayout,
+    addPageElement,
+    updatePageElement,
+    deletePageElement,
+    refreshCustomization,
+    publishPage
   };
 
   return (

@@ -18,6 +18,7 @@ import LanguageToggle from './ui/LanguageToggle';
 import CounterAnimation from './animations/CounterAnimation';
 import SEOOptimizer from './optimization/SEOOptimizer';
 import PerformanceTracker from './optimization/PerformanceTracker';
+import CustomElementsRenderer from './CustomElementsRenderer';
 
 const LandingPage: React.FC = () => {
   // Hooks
@@ -175,7 +176,7 @@ const LandingPage: React.FC = () => {
       icon: Award,
       title: language === 'ar' ? 'موثوقية عالية' : 'High Reliability',
       description: language === 'ar' 
-        ? 'ضمان الجودة وإرجاع الأموال في حالة عدم الرضا' 
+        ? 'ضمان الجودة وإرجاع الأموال في حالة عد�� الرضا' 
         : 'Quality guarantee and money back in case of dissatisfaction',
       color: 'from-green-500 to-green-600',
       benefits: language === 'ar' 
@@ -219,6 +220,36 @@ const LandingPage: React.FC = () => {
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, [activeSection]);
+
+  // Listen for page published events
+  useEffect(() => {
+    const handlePagePublished = (event: any) => {
+      console.log('Page published, refreshing data...');
+      refreshData();
+      // Optionally show a toast
+      if (typeof window !== 'undefined') {
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      }
+    };
+
+    window.addEventListener('pagePublished', handlePagePublished);
+    return () => window.removeEventListener('pagePublished', handlePagePublished);
+  }, [refreshData]);
+
+  // Apply global CSS variables from customization
+  useEffect(() => {
+    if (customization?.globalSettings) {
+      const root = document.documentElement;
+      root.style.setProperty('--primary-color', customization.globalSettings.primaryColor);
+      root.style.setProperty('--secondary-color', customization.globalSettings.secondaryColor);
+      root.style.setProperty('--accent-color', customization.globalSettings.accentColor);
+      root.style.setProperty('--font-family', customization.globalSettings.fontFamily);
+      root.style.setProperty('--border-radius', customization.globalSettings.borderRadius);
+      root.style.setProperty('--spacing', customization.globalSettings.spacing);
+    }
+  }, [customization]);
 
   // Smooth scroll to section
   const scrollToSection = useCallback((sectionId: string) => {
@@ -689,7 +720,7 @@ const LandingPage: React.FC = () => {
                 <p className={`text-lg ${
                   theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
                 }`}>
-                  {language === 'ar' ? 'لا توجد خدمات متاحة حالياً' : 'No services available at the moment'}
+                  {language === 'ar' ? 'لا توجد خدمات متاحة ح��لياً' : 'No services available at the moment'}
                 </p>
               </div>
             )}
@@ -935,6 +966,9 @@ const LandingPage: React.FC = () => {
         </div>
       </section>
 
+      {/* Custom Elements */}
+      <CustomElementsRenderer />
+
       {/* FAQ Section */}
       <section id="faq" className="py-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -981,11 +1015,11 @@ const LandingPage: React.FC = () => {
                 a: 'نعم، نحن نستخدم أعلى معايير الأمان والتشفير. جميع البيانات محمية ولا نحتفظ بأي معلومات حساسة.'
               },
               {
-                q: 'ما هي طرق الدفع المتاحة؟',
+                q: 'ما ��ي طرق الدفع المتاحة؟',
                 a: 'نقبل الدفع عبر فودافون كاش، USDT، وطرق دفع أخرى. يمكنك مراجعة جميع الطرق المتاحة في قسم طرق الدفع.'
               },
               {
-                q: 'هل تقدمون ضمان على الخدمات؟',
+                q: 'هل تقدمون ضمان ع��ى الخدمات؟',
                 a: 'نعم، نحن نقدم ضمان استرداد الأموال في حالة عدم تنفيذ الخدمة كما هو متفق عليه.'
               },
               {
@@ -1050,7 +1084,7 @@ const LandingPage: React.FC = () => {
               className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-8 py-4 rounded-xl font-semibold hover:shadow-xl hover:scale-105 transition-all duration-300 flex items-center justify-center space-x-reverse space-x-2 mx-auto"
             >
               <MessageCircle className="h-5 w-5" />
-              <span>{language === 'ar' ? 'تواصل معنا عبر واتساب' : 'Contact us via WhatsApp'}</span>
+              <span>{language === 'ar' ? 'تواصل معنا عبر ��اتساب' : 'Contact us via WhatsApp'}</span>
             </button>
           </div>
         </div>
@@ -1084,7 +1118,7 @@ const LandingPage: React.FC = () => {
                 theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
               }`}>
                 {language === 'ar' 
-                  ? 'نحن نقدم خدمات مالية رقمية آمنة وموثوقة مع أعلى معايير الجودة والحماية لعملائنا الكرام.'
+                  ? 'نحن نقدم خدمات مالية رقمية آمنة وموثوقة مع أعلى معايير الجود�� والحماية لعملائنا الكرام.'
                   : 'We provide secure and reliable digital financial services with the highest standards of quality and protection for our valued customers.'
                 }
               </p>
