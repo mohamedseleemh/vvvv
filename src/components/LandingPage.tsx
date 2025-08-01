@@ -68,7 +68,7 @@ const LandingPage: React.FC = () => {
       role: 'مؤسسة شركة',
       avatar: '👩‍💼',
       rating: 5,
-      comment: 'أفضل منصة للخدمات المالية، دعم فني ممتاز وأسعار مناسبة جداً.',
+      comment: 'أفضل منصة للخدمات المالية، دعم فني ممتاز وأسعار مناسبة ج��اً.',
       date: '2024-11-10',
       verified: true
     },
@@ -219,6 +219,36 @@ const LandingPage: React.FC = () => {
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, [activeSection]);
+
+  // Listen for page published events
+  useEffect(() => {
+    const handlePagePublished = (event: any) => {
+      console.log('Page published, refreshing data...');
+      refreshData();
+      // Optionally show a toast
+      if (typeof window !== 'undefined') {
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      }
+    };
+
+    window.addEventListener('pagePublished', handlePagePublished);
+    return () => window.removeEventListener('pagePublished', handlePagePublished);
+  }, [refreshData]);
+
+  // Apply global CSS variables from customization
+  useEffect(() => {
+    if (customization?.globalSettings) {
+      const root = document.documentElement;
+      root.style.setProperty('--primary-color', customization.globalSettings.primaryColor);
+      root.style.setProperty('--secondary-color', customization.globalSettings.secondaryColor);
+      root.style.setProperty('--accent-color', customization.globalSettings.accentColor);
+      root.style.setProperty('--font-family', customization.globalSettings.fontFamily);
+      root.style.setProperty('--border-radius', customization.globalSettings.borderRadius);
+      root.style.setProperty('--spacing', customization.globalSettings.spacing);
+    }
+  }, [customization]);
 
   // Smooth scroll to section
   const scrollToSection = useCallback((sectionId: string) => {
@@ -739,7 +769,7 @@ const LandingPage: React.FC = () => {
               theme === 'dark' ? 'text-white' : 'text-gray-900'
             }`}>
               {language === 'ar' ? (
-                <>لماذا <span className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                <>ل��اذا <span className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
                   نحن الأفضل؟
                 </span></>
               ) : (
