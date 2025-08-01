@@ -18,6 +18,7 @@ import LanguageToggle from './ui/LanguageToggle';
 import CounterAnimation from './animations/CounterAnimation';
 import SEOOptimizer from './optimization/SEOOptimizer';
 import PerformanceTracker from './optimization/PerformanceTracker';
+import CustomElementsRenderer from './CustomElementsRenderer';
 
 const LandingPage: React.FC = () => {
   // Hooks
@@ -68,7 +69,7 @@ const LandingPage: React.FC = () => {
       role: 'مؤسسة شركة',
       avatar: '👩‍💼',
       rating: 5,
-      comment: 'أفضل منصة للخدمات المالية، دعم فني ممتاز وأسعار مناسبة ج��اً.',
+      comment: 'أفضل منصة للخدمات المالية، دعم فني ممتاز وأسعار مناسبة جداً.',
       date: '2024-11-10',
       verified: true
     },
@@ -769,7 +770,7 @@ const LandingPage: React.FC = () => {
               theme === 'dark' ? 'text-white' : 'text-gray-900'
             }`}>
               {language === 'ar' ? (
-                <>ل��اذا <span className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                <>لماذا <span className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
                   نحن الأفضل؟
                 </span></>
               ) : (
@@ -1011,7 +1012,7 @@ const LandingPage: React.FC = () => {
                 a: 'نعم، نحن نستخدم أعلى معايير الأمان والتشفير. جميع البيانات محمية ولا نحتفظ بأي معلومات حساسة.'
               },
               {
-                q: 'ما هي طرق الدفع المتاحة؟',
+                q: 'ما ��ي طرق الدفع المتاحة؟',
                 a: 'نقبل الدفع عبر فودافون كاش، USDT، وطرق دفع أخرى. يمكنك مراجعة جميع الطرق المتاحة في قسم طرق الدفع.'
               },
               {
@@ -1080,7 +1081,7 @@ const LandingPage: React.FC = () => {
               className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-8 py-4 rounded-xl font-semibold hover:shadow-xl hover:scale-105 transition-all duration-300 flex items-center justify-center space-x-reverse space-x-2 mx-auto"
             >
               <MessageCircle className="h-5 w-5" />
-              <span>{language === 'ar' ? 'تواصل معنا عبر واتساب' : 'Contact us via WhatsApp'}</span>
+              <span>{language === 'ar' ? 'تواصل معنا عبر ��اتساب' : 'Contact us via WhatsApp'}</span>
             </button>
           </div>
         </div>
