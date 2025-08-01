@@ -1,597 +1,900 @@
-import React, { useState, useRef } from 'react';
-import { Save, Globe, FileText, Bell, Phone, Upload, Image, Settings, Palette, Type } from 'lucide-react';
-import { useData } from '../../context/DataContext';
-import { useTheme } from '../../context/ThemeContext';
-import LoadingSpinner from '../ui/LoadingSpinner';
-import ErrorMessage from '../ui/ErrorMessage';
+import React, { useState, useEffect } from 'react';
+import { 
+  Globe, Mail, Phone, MapPin, Clock, Save, 
+  Upload, Image, Link, MessageCircle, Shield, 
+  Eye, Settings, Palette, Code, Database,
+  AlertCircle, Check, X
+} from 'lucide-react';
 
-const SiteSettingsManager: React.FC = () => {
-  const { siteSettings, updateSiteSettings, loading, error, refreshData } = useData();
-  const { theme } = useTheme();
-  const [activeTab, setActiveTab] = useState<'general' | 'logo' | 'colors' | 'advanced'>('general');
-  const logoInputRef = useRef<HTMLInputElement>(null);
-  const faviconInputRef = useRef<HTMLInputElement>(null);
-
-  const [formData, setFormData] = useState({
-    title: siteSettings.title,
-    description: siteSettings.description,
-    orderNotice: siteSettings.orderNotice,
-    whatsappNumber: siteSettings.whatsappNumber || '+201062453344',
-    logoUrl: '',
-    faviconUrl: '',
-    primaryColor: '#3B82F6',
-    secondaryColor: '#1E40AF',
-    accentColor: '#F59E0B',
-    fontFamily: 'Cairo',
-    metaKeywords: '',
-    metaDescription: '',
-    maintenanceMode: false,
-    maintenanceMessage: ''
-  });
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    updateSiteSettings(formData);
+interface SiteSettings {
+  // Company Information
+  companyName: string;
+  companyDescription: string;
+  companyLogo: string;
+  companyAddress: string;
+  companyCity: string;
+  companyCountry: string;
+  companyPhone: string;
+  companyEmail: string;
+  companyWebsite: string;
+  
+  // Business Hours
+  businessHours: {
+    [key: string]: {
+      open: string;
+      close: string;
+      isOpen: boolean;
+    };
   };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+  
+  // Social Media
+  socialMedia: {
+    whatsapp: string;
+    telegram: string;
+    twitter: string;
+    instagram: string;
+    linkedin: string;
+    facebook: string;
   };
+  
+  // SEO Settings
+  seo: {
+    title: string;
+    description: string;
+    keywords: string;
+    favicon: string;
+    ogImage: string;
+  };
+  
+  // Appearance
+  theme: {
+    primaryColor: string;
+    secondaryColor: string;
+    accentColor: string;
+    darkMode: boolean;
+    rtl: boolean;
+    language: string;
+  };
+  
+  // Features
+  features: {
+    enableRegistration: boolean;
+    enableComments: boolean;
+    enableNotifications: boolean;
+    enableAnalytics: boolean;
+    enableMultiLanguage: boolean;
+    enableDarkMode: boolean;
+  };
+  
+  // Security
+  security: {
+    enableCaptcha: boolean;
+    maxLoginAttempts: number;
+    sessionTimeout: number;
+    enableTwoFactor: boolean;
+    enableSSL: boolean;
+  };
+  
+  // Notifications
+  notifications: {
+    emailNotifications: boolean;
+    smsNotifications: boolean;
+    whatsappNotifications: boolean;
+    newOrderNotification: boolean;
+    paymentNotification: boolean;
+  };
+  
+  // Maintenance
+  maintenance: {
+    enabled: boolean;
+    message: string;
+    allowedIPs: string[];
+  };
+}
 
-  if (loading) {
-    return <LoadingSpinner size="lg" text="جاري تحميل الإعدادات..." />;
-  }
+export const SiteSettingsManager: React.FC = () => {
+  const [settings, setSettings] = useState<SiteSettings | null>(null);
+  const [activeTab, setActiveTab] = useState('company');
+  const [isSaving, setIsSaving] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [saveMessage, setSaveMessage] = useState<string | null>(null);
 
-  if (error) {
-    return <ErrorMessage message={error} onRetry={refreshData} />;
-  }
+  useEffect(() => {
+    loadSettings();
+  }, []);
 
-  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const result = e.target?.result as string;
-        setFormData({ ...formData, logoUrl: result });
-      };
-      reader.readAsDataURL(file);
+  const loadSettings = async () => {
+    try {
+      // Try to load from localStorage first
+      const stored = localStorage.getItem('kyc-site-settings');
+      if (stored) {
+        setSettings(JSON.parse(stored));
+      } else {
+        // Initialize with default settings
+        const defaultSettings: SiteSettings = {
+          companyName: 'KYCtrust للخدمات الرقمية',
+          companyDescription: 'منصة متخصصة في تقديم خدمات التحقق من الهوية وحلول KYC المبتكرة',
+          companyLogo: '',
+          companyAddress: 'الرياض، المملكة العربية السعودية',
+          companyCity: 'الرياض',
+          companyCountry: 'المملكة العربية السعودية',
+          companyPhone: '+966501234567',
+          companyEmail: 'info@kyctrust.com',
+          companyWebsite: 'https://kyctrust.com',
+          
+          businessHours: {
+            sunday: { open: '09:00', close: '17:00', isOpen: true },
+            monday: { open: '09:00', close: '17:00', isOpen: true },
+            tuesday: { open: '09:00', close: '17:00', isOpen: true },
+            wednesday: { open: '09:00', close: '17:00', isOpen: true },
+            thursday: { open: '09:00', close: '17:00', isOpen: true },
+            friday: { open: '09:00', close: '17:00', isOpen: false },
+            saturday: { open: '09:00', close: '17:00', isOpen: false }
+          },
+          
+          socialMedia: {
+            whatsapp: '+966501234567',
+            telegram: '@kyctrust',
+            twitter: '@kyctrust',
+            instagram: 'kyctrust',
+            linkedin: 'company/kyctrust',
+            facebook: 'kyctrust'
+          },
+          
+          seo: {
+            title: 'KYCtrust - خدمات التحقق من الهوية',
+            description: 'منصة متخصصة في تقديم خدمات التحقق من الهوية وحلول KYC المبتكرة للشركات والأفراد',
+            keywords: 'KYC, التحقق من الهوية, خدمات رقمية, أمان, مصادقة',
+            favicon: '/favicon.ico',
+            ogImage: ''
+          },
+          
+          theme: {
+            primaryColor: '#3B82F6',
+            secondaryColor: '#10B981',
+            accentColor: '#F59E0B',
+            darkMode: true,
+            rtl: true,
+            language: 'ar'
+          },
+          
+          features: {
+            enableRegistration: true,
+            enableComments: false,
+            enableNotifications: true,
+            enableAnalytics: true,
+            enableMultiLanguage: true,
+            enableDarkMode: true
+          },
+          
+          security: {
+            enableCaptcha: false,
+            maxLoginAttempts: 5,
+            sessionTimeout: 30,
+            enableTwoFactor: false,
+            enableSSL: true
+          },
+          
+          notifications: {
+            emailNotifications: true,
+            smsNotifications: false,
+            whatsappNotifications: true,
+            newOrderNotification: true,
+            paymentNotification: true
+          },
+          
+          maintenance: {
+            enabled: false,
+            message: 'الموقع تحت الصيانة. سنعود قريباً!',
+            allowedIPs: []
+          }
+        };
+        
+        setSettings(defaultSettings);
+        localStorage.setItem('kyc-site-settings', JSON.stringify(defaultSettings));
+      }
+    } catch (error) {
+      console.error('خطأ في تحميل الإعدادات:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleFaviconUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const result = e.target?.result as string;
-        setFormData({ ...formData, faviconUrl: result });
-      };
-      reader.readAsDataURL(file);
+  const saveSettings = async () => {
+    if (!settings) return;
+    
+    setIsSaving(true);
+    try {
+      // Save to localStorage
+      localStorage.setItem('kyc-site-settings', JSON.stringify(settings));
+      
+      // Try to save to API if available
+      try {
+        await fetch('/api/site-settings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(settings)
+        });
+      } catch (apiError) {
+        console.log('API غير متاح، تم الحفظ محلياً فقط');
+      }
+      
+      setSaveMessage('تم حفظ الإعدادات بنجاح');
+      setTimeout(() => setSaveMessage(null), 3000);
+    } catch (error) {
+      console.error('خطأ في حفظ الإعدادات:', error);
+      setSaveMessage('حدث خطأ أثناء حفظ الإعدادات');
+    } finally {
+      setIsSaving(false);
     }
   };
+
+  const updateSetting = (section: string, field: string, value: any) => {
+    if (!settings) return;
+    
+    setSettings(prev => ({
+      ...prev!,
+      [section]: {
+        ...prev![section as keyof SiteSettings],
+        [field]: value
+      }
+    }));
+  };
+
+  const updateNestedSetting = (section: string, subsection: string, field: string, value: any) => {
+    if (!settings) return;
+    
+    setSettings(prev => ({
+      ...prev!,
+      [section]: {
+        ...prev![section as keyof SiteSettings],
+        [subsection]: {
+          ...(prev![section as keyof SiteSettings] as any)[subsection],
+          [field]: value
+        }
+      }
+    }));
+  };
+
+  const tabs = [
+    { id: 'company', label: 'معلومات الشركة', icon: Globe },
+    { id: 'social', label: 'وسائل التواصل', icon: MessageCircle },
+    { id: 'seo', label: 'تحسين محركات البحث', icon: Globe },
+    { id: 'appearance', label: 'المظهر', icon: Palette },
+    { id: 'features', label: 'المميزات', icon: Settings },
+    { id: 'security', label: 'الأمان', icon: Shield },
+    { id: 'notifications', label: 'الإشعارات', icon: AlertCircle },
+    { id: 'maintenance', label: 'الصيانة', icon: Settings }
+  ];
+
+  const daysOfWeek = [
+    { key: 'sunday', name: 'الأحد' },
+    { key: 'monday', name: 'الإثنين' },
+    { key: 'tuesday', name: 'الثلاثاء' },
+    { key: 'wednesday', name: 'الأربعاء' },
+    { key: 'thursday', name: 'الخميس' },
+    { key: 'friday', name: 'الجمعة' },
+    { key: 'saturday', name: 'السبت' }
+  ];
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (!settings) {
+    return (
+      <div className="text-center py-12">
+        <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+        <p className="text-gray-600 dark:text-gray-400">حدث خطأ في تحميل الإعدادات</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex justify-between items-center">
         <div>
-          <h1 className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>إعدادات الموقع</h1>
-          <p className={`mt-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>تحكم في جميع إعدادات ومظهر الموقع</p>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+            إعدادات الموقع
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400">
+            إدارة الإعدادات العامة للموقع والتطبيق
+          </p>
         </div>
-
+        
         <button
-          onClick={handleSubmit}
-          className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg transition-all duration-300 flex items-center space-x-reverse space-x-2"
+          onClick={saveSettings}
+          disabled={isSaving}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg flex items-center
+                   disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <Save className="h-5 w-5" />
-          <span>حفظ جميع التغييرات</span>
+          {isSaving ? (
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+          ) : (
+            <Save className="h-4 w-4 mr-2" />
+          )}
+          {isSaving ? 'جاري الحفظ...' : 'حفظ الإعدادات'}
         </button>
       </div>
 
+      {/* Save Message */}
+      {saveMessage && (
+        <div className={`p-4 rounded-lg flex items-center ${
+          saveMessage.includes('نجاح') 
+            ? 'bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-200 border border-green-200 dark:border-green-800'
+            : 'bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-200 border border-red-200 dark:border-red-800'
+        }`}>
+          {saveMessage.includes('نجاح') ? (
+            <Check className="h-5 w-5 mr-2" />
+          ) : (
+            <X className="h-5 w-5 mr-2" />
+          )}
+          {saveMessage}
+        </div>
+      )}
+
       {/* Tabs */}
-      <div className={`border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
-        <nav className="flex space-x-reverse space-x-8">
-          {[
-            { id: 'general', name: 'الإعدادات العامة', icon: Settings },
-            { id: 'logo', name: 'اللوجو والصور', icon: Image },
-            { id: 'colors', name: 'الألوان والخطوط', icon: Palette },
-            { id: 'advanced', name: 'الإعدادات المتقدمة', icon: Globe }
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
-              className={`flex items-center space-x-reverse space-x-2 py-4 px-2 border-b-2 font-medium text-sm transition-colors ${
-                activeTab === tab.id
-                  ? 'border-blue-500 text-blue-600'
-                  : theme === 'dark'
-                  ? 'border-transparent text-gray-400 hover:text-gray-300'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              <tab.icon className="h-4 w-4" />
-              <span>{tab.name}</span>
-            </button>
-          ))}
-        </nav>
-      </div>
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
+        <div className="border-b border-gray-200 dark:border-gray-700">
+          <nav className="flex flex-wrap">
+            {tabs.map((tab) => {
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex items-center px-4 py-3 text-sm font-medium border-b-2 ${
+                    activeTab === tab.id
+                      ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                      : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                  }`}
+                >
+                  <Icon className="h-4 w-4 mr-2" />
+                  {tab.label}
+                </button>
+              );
+            })}
+          </nav>
+        </div>
 
-      {/* Content */}
-      <div className={`rounded-xl shadow-sm border ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'}`}>
-        <div className="p-6 space-y-6">
-
-          {/* General Settings Tab */}
-          {activeTab === 'general' && (
+        <div className="p-6">
+          {/* Company Information Tab */}
+          {activeTab === 'company' && (
             <div className="space-y-6">
-          {/* Site Title */}
-          <div>
-            <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
-              <div className="flex items-center space-x-reverse space-x-2">
-                <Globe className="h-4 w-4 text-blue-600" />
-                <span>عنوان الموقع الرئيسي</span>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    اسم الشركة
+                  </label>
+                  <input
+                    type="text"
+                    value={settings.companyName}
+                    onChange={(e) => setSettings({...settings, companyName: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg
+                             bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    البريد الإلكتروني
+                  </label>
+                  <input
+                    type="email"
+                    value={settings.companyEmail}
+                    onChange={(e) => setSettings({...settings, companyEmail: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg
+                             bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    رقم الهاتف
+                  </label>
+                  <input
+                    type="tel"
+                    value={settings.companyPhone}
+                    onChange={(e) => setSettings({...settings, companyPhone: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg
+                             bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    الموقع الإلكتروني
+                  </label>
+                  <input
+                    type="url"
+                    value={settings.companyWebsite}
+                    onChange={(e) => setSettings({...settings, companyWebsite: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg
+                             bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                  />
+                </div>
               </div>
-            </label>
-            <input
-              type="text"
-              id="title"
-              name="title"
-              value={formData.title}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-              placeholder="عنوان جذاب للموقع"
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              سيظهر هذا العنوان في أعلى الصفحة الرئيسية
-            </p>
-          </div>
-
-          {/* Site Description */}
-          <div>
-            <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
-              <div className="flex items-center space-x-reverse space-x-2">
-                <FileText className="h-4 w-4 text-blue-600" />
-                <span>وصف الموقع</span>
-              </div>
-            </label>
-            <textarea
-              id="description"
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              required
-              rows={4}
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"
-              placeholder="وصف تعريفي شامل عن خدمات الموقع"
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              وصف مختصر يظهر ��حت العنوان الرئيسي لتعريف العملاء بخدماتك
-            </p>
-          </div>
-
-          {/* WhatsApp Number */}
-          <div>
-            <label htmlFor="whatsappNumber" className="block text-sm font-medium text-gray-700 mb-2">
-              <div className="flex items-center space-x-reverse space-x-2">
-                <Phone className="h-4 w-4 text-green-600" />
-                <span>رقم الواتس اب</span>
-              </div>
-            </label>
-            <input
-              type="tel"
-              id="whatsappNumber"
-              name="whatsappNumber"
-              value={formData.whatsappNumber}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-              placeholder="+966501234567"
-              dir="ltr"
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              رقم الواتس اب الذي سيتم ��رسال الطلبات إليه (مع رمز الدولة)
-            </p>
-          </div>
-
-          {/* Order Notice */}
-          <div>
-            <label htmlFor="orderNotice" className="block text-sm font-medium text-gray-700 mb-2">
-              <div className="flex items-center space-x-reverse space-x-2">
-                <Bell className="h-4 w-4 text-blue-600" />
-                <span>تنبيه الطلبات</span>
-              </div>
-            </label>
-            <textarea
-              id="orderNotice"
-              name="orderNotice"
-              value={formData.orderNotice}
-              onChange={handleChange}
-              required
-              rows={3}
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"
-              placeholder="رسالة تظهر للعملاء بعد إرسال الطلب"
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              رسالة تنبيه تظهر للعملاء في نموذج الطلب وبعد الإرسال
-            </p>
-          </div>
-
-            </div>
-          )}
-
-          {/* Logo & Images Tab */}
-          {activeTab === 'logo' && (
-            <div className="space-y-6">
-              <h2 className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>اللوجو والصور</h2>
-
-              {/* Logo Upload */}
+              
               <div>
-                <label className={`block text-sm font-medium mb-4 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                  لوجو الموقع الرئيسي
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  وصف الشركة
                 </label>
+                <textarea
+                  value={settings.companyDescription}
+                  onChange={(e) => setSettings({...settings, companyDescription: e.target.value})}
+                  rows={4}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg
+                           bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                />
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    العنوان
+                  </label>
+                  <input
+                    type="text"
+                    value={settings.companyAddress}
+                    onChange={(e) => setSettings({...settings, companyAddress: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg
+                             bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    المدينة
+                  </label>
+                  <input
+                    type="text"
+                    value={settings.companyCity}
+                    onChange={(e) => setSettings({...settings, companyCity: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg
+                             bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    الدولة
+                  </label>
+                  <input
+                    type="text"
+                    value={settings.companyCountry}
+                    onChange={(e) => setSettings({...settings, companyCountry: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg
+                             bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                  />
+                </div>
+              </div>
 
-                <div className="flex items-center space-x-reverse space-x-6">
-                  <div className={`w-32 h-32 rounded-xl border-2 border-dashed flex items-center justify-center ${theme === 'dark' ? 'border-gray-600 bg-gray-700' : 'border-gray-300 bg-gray-50'}`}>
-                    {formData.logoUrl ? (
-                      <img src={formData.logoUrl} alt="Logo" className="w-full h-full object-contain rounded-xl" />
-                    ) : (
-                      <div className="text-center">
-                        <Image className={`h-8 w-8 mx-auto mb-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-400'}`} />
-                        <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>لا يوجد لوجو</p>
+              {/* Business Hours */}
+              <div>
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">ساعات العمل</h3>
+                <div className="space-y-3">
+                  {daysOfWeek.map((day) => (
+                    <div key={day.key} className="flex items-center space-x-4 space-x-reverse">
+                      <div className="w-20">
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                          {day.name}
+                        </span>
                       </div>
-                    )}
-                  </div>
-
-                  <div className="flex-1">
-                    <input
-                      type="file"
-                      ref={logoInputRef}
-                      onChange={handleLogoUpload}
-                      accept="image/*"
-                      className="hidden"
-                    />
-
-                    <button
-                      type="button"
-                      onClick={() => logoInputRef.current?.click()}
-                      className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg transition-all duration-300 flex items-center justify-center space-x-reverse space-x-2 mb-3"
-                    >
-                      <Upload className="h-5 w-5" />
-                      <span>رفع لوجو جديد</span>
-                    </button>
-
-                    <p className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                      الحد الأقصى: 2MB • أشكال مدعومة: PNG, JPG, SVG
-                    </p>
-
-                    {formData.logoUrl && (
-                      <button
-                        type="button"
-                        onClick={() => setFormData({ ...formData, logoUrl: '' })}
-                        className="mt-2 text-red-600 hover:text-red-700 text-sm font-medium"
-                      >
-                        حذف اللوجو
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Favicon Upload */}
-              <div>
-                <label className={`block text-sm font-medium mb-4 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                  أيقونة الموقع (Favicon)
-                </label>
-
-                <div className="flex items-center space-x-reverse space-x-6">
-                  <div className={`w-16 h-16 rounded-lg border-2 border-dashed flex items-center justify-center ${theme === 'dark' ? 'border-gray-600 bg-gray-700' : 'border-gray-300 bg-gray-50'}`}>
-                    {formData.faviconUrl ? (
-                      <img src={formData.faviconUrl} alt="Favicon" className="w-full h-full object-contain rounded-lg" />
-                    ) : (
-                      <Globe className={`h-6 w-6 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-400'}`} />
-                    )}
-                  </div>
-
-                  <div className="flex-1">
-                    <input
-                      type="file"
-                      ref={faviconInputRef}
-                      onChange={handleFaviconUpload}
-                      accept="image/*"
-                      className="hidden"
-                    />
-
-                    <button
-                      type="button"
-                      onClick={() => faviconInputRef.current?.click()}
-                      className="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-4 py-2 rounded-lg font-medium hover:shadow-lg transition-all duration-300 flex items-center space-x-reverse space-x-2"
-                    >
-                      <Upload className="h-4 w-4" />
-                      <span>رفع أيقونة</span>
-                    </button>
-
-                    <p className={`text-xs mt-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                      مقاس مفضل: 32x32px أو 16x16px
-                    </p>
-                  </div>
+                      
+                      <div className="flex items-center">
+                        <input
+                          type="checkbox"
+                          checked={settings.businessHours[day.key]?.isOpen || false}
+                          onChange={(e) => updateNestedSetting('businessHours', day.key, 'isOpen', e.target.checked)}
+                          className="mr-2"
+                        />
+                        <span className="text-sm text-gray-600 dark:text-gray-400 ml-4">مفتوح</span>
+                      </div>
+                      
+                      {settings.businessHours[day.key]?.isOpen && (
+                        <>
+                          <input
+                            type="time"
+                            value={settings.businessHours[day.key]?.open || '09:00'}
+                            onChange={(e) => updateNestedSetting('businessHours', day.key, 'open', e.target.value)}
+                            className="px-3 py-1 border border-gray-300 dark:border-gray-700 rounded
+                                     bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm"
+                          />
+                          <span className="text-gray-500">إلى</span>
+                          <input
+                            type="time"
+                            value={settings.businessHours[day.key]?.close || '17:00'}
+                            onChange={(e) => updateNestedSetting('businessHours', day.key, 'close', e.target.value)}
+                            className="px-3 py-1 border border-gray-300 dark:border-gray-700 rounded
+                                     bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm"
+                          />
+                        </>
+                      )}
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
           )}
 
-          {/* Colors & Fonts Tab */}
-          {activeTab === 'colors' && (
-            <div className="space-y-6">
-              <h2 className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>الألوان والخطوط</h2>
+          {/* Social Media Tab */}
+          {activeTab === 'social' && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  واتساب
+                </label>
+                <input
+                  type="text"
+                  value={settings.socialMedia.whatsapp}
+                  onChange={(e) => updateSetting('socialMedia', 'whatsapp', e.target.value)}
+                  placeholder="+966501234567"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg
+                           bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  تليجرام
+                </label>
+                <input
+                  type="text"
+                  value={settings.socialMedia.telegram}
+                  onChange={(e) => updateSetting('socialMedia', 'telegram', e.target.value)}
+                  placeholder="@username"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg
+                           bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  تويتر
+                </label>
+                <input
+                  type="text"
+                  value={settings.socialMedia.twitter}
+                  onChange={(e) => updateSetting('socialMedia', 'twitter', e.target.value)}
+                  placeholder="@username"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg
+                           bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  إنستاجرام
+                </label>
+                <input
+                  type="text"
+                  value={settings.socialMedia.instagram}
+                  onChange={(e) => updateSetting('socialMedia', 'instagram', e.target.value)}
+                  placeholder="username"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg
+                           bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  لينكد إن
+                </label>
+                <input
+                  type="text"
+                  value={settings.socialMedia.linkedin}
+                  onChange={(e) => updateSetting('socialMedia', 'linkedin', e.target.value)}
+                  placeholder="company/name"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg
+                           bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  فيسبوك
+                </label>
+                <input
+                  type="text"
+                  value={settings.socialMedia.facebook}
+                  onChange={(e) => updateSetting('socialMedia', 'facebook', e.target.value)}
+                  placeholder="pagename"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg
+                           bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                />
+              </div>
+            </div>
+          )}
 
-              {/* Colors */}
+          {/* SEO Tab */}
+          {activeTab === 'seo' && (
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  عنوان الموقع
+                </label>
+                <input
+                  type="text"
+                  value={settings.seo.title}
+                  onChange={(e) => updateSetting('seo', 'title', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg
+                           bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  وصف الموقع
+                </label>
+                <textarea
+                  value={settings.seo.description}
+                  onChange={(e) => updateSetting('seo', 'description', e.target.value)}
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg
+                           bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  الكلمات المفتاحية (مفصولة بفواصل)
+                </label>
+                <input
+                  type="text"
+                  value={settings.seo.keywords}
+                  onChange={(e) => updateSetting('seo', 'keywords', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg
+                           bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Appearance Tab */}
+          {activeTab === 'appearance' && (
+            <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
-                  <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     اللون الأساسي
                   </label>
-                  <div className="flex items-center space-x-reverse space-x-3">
-                    <input
-                      type="color"
-                      value={formData.primaryColor}
-                      onChange={(e) => setFormData({ ...formData, primaryColor: e.target.value })}
-                      className="h-12 w-16 rounded-lg border border-gray-300 cursor-pointer"
-                    />
-                    <input
-                      type="text"
-                      value={formData.primaryColor}
-                      onChange={(e) => setFormData({ ...formData, primaryColor: e.target.value })}
-                      className={`flex-1 px-4 py-3 rounded-xl border ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
-                    />
-                  </div>
+                  <input
+                    type="color"
+                    value={settings.theme.primaryColor}
+                    onChange={(e) => updateSetting('theme', 'primaryColor', e.target.value)}
+                    className="w-full h-10 border border-gray-300 dark:border-gray-700 rounded-lg"
+                  />
                 </div>
-
+                
                 <div>
-                  <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     اللون الثانوي
                   </label>
-                  <div className="flex items-center space-x-reverse space-x-3">
-                    <input
-                      type="color"
-                      value={formData.secondaryColor}
-                      onChange={(e) => setFormData({ ...formData, secondaryColor: e.target.value })}
-                      className="h-12 w-16 rounded-lg border border-gray-300 cursor-pointer"
-                    />
-                    <input
-                      type="text"
-                      value={formData.secondaryColor}
-                      onChange={(e) => setFormData({ ...formData, secondaryColor: e.target.value })}
-                      className={`flex-1 px-4 py-3 rounded-xl border ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
-                    />
-                  </div>
+                  <input
+                    type="color"
+                    value={settings.theme.secondaryColor}
+                    onChange={(e) => updateSetting('theme', 'secondaryColor', e.target.value)}
+                    className="w-full h-10 border border-gray-300 dark:border-gray-700 rounded-lg"
+                  />
                 </div>
-
+                
                 <div>
-                  <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                    لون الإبراز
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    لون التمييز
                   </label>
-                  <div className="flex items-center space-x-reverse space-x-3">
-                    <input
-                      type="color"
-                      value={formData.accentColor}
-                      onChange={(e) => setFormData({ ...formData, accentColor: e.target.value })}
-                      className="h-12 w-16 rounded-lg border border-gray-300 cursor-pointer"
-                    />
-                    <input
-                      type="text"
-                      value={formData.accentColor}
-                      onChange={(e) => setFormData({ ...formData, accentColor: e.target.value })}
-                      className={`flex-1 px-4 py-3 rounded-xl border ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
-                    />
-                  </div>
+                  <input
+                    type="color"
+                    value={settings.theme.accentColor}
+                    onChange={(e) => updateSetting('theme', 'accentColor', e.target.value)}
+                    className="w-full h-10 border border-gray-300 dark:border-gray-700 rounded-lg"
+                  />
                 </div>
               </div>
-
-              {/* Font Selection */}
-              <div>
-                <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                  خط الموقع الأساسي
-                </label>
-                <select
-                  value={formData.fontFamily}
-                  onChange={(e) => setFormData({ ...formData, fontFamily: e.target.value })}
-                  className={`w-full px-4 py-3 rounded-xl border ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
-                >
-                  <option value="Cairo">Cairo (عربي)</option>
-                  <option value="Tajawal">Tajawal (عربي)</option>
-                  <option value="Inter">Inter (��نجليزي)</option>
-                  <option value="Roboto">Roboto (إنجليزي)</option>
-                  <option value="Poppins">Poppins (إنجليزي)</option>
-                </select>
-              </div>
-
-              {/* Color Preview */}
-              <div className={`p-6 rounded-xl ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'}`}>
-                <h3 className={`text-lg font-semibold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>معاينة الألوان</h3>
-                <div className="grid grid-cols-3 gap-4 mb-4">
-                  <div className="text-center">
-                    <div
-                      className="w-full h-16 rounded-xl border border-gray-300"
-                      style={{ backgroundColor: formData.primaryColor }}
-                    />
-                    <span className="text-sm font-medium mt-2 block">أساسي</span>
-                  </div>
-                  <div className="text-center">
-                    <div
-                      className="w-full h-16 rounded-xl border border-gray-300"
-                      style={{ backgroundColor: formData.secondaryColor }}
-                    />
-                    <span className="text-sm font-medium mt-2 block">ثانوي</span>
-                  </div>
-                  <div className="text-center">
-                    <div
-                      className="w-full h-16 rounded-xl border border-gray-300"
-                      style={{ backgroundColor: formData.accentColor }}
-                    />
-                    <span className="text-sm font-medium mt-2 block">إبراز</span>
-                  </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    اللغة الافتراضية
+                  </label>
+                  <select
+                    value={settings.theme.language}
+                    onChange={(e) => updateSetting('theme', 'language', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg
+                             bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                  >
+                    <option value="ar">العربية</option>
+                    <option value="en">English</option>
+                  </select>
                 </div>
-
-                <button
-                  className="w-full text-white px-6 py-3 rounded-xl font-semibold"
-                  style={{ background: `linear-gradient(to right, ${formData.primaryColor}, ${formData.secondaryColor})` }}
-                >
-                  زر تجريبي بالألوان الجديدة
-                </button>
+                
+                <div className="space-y-4">
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={settings.theme.rtl}
+                      onChange={(e) => updateSetting('theme', 'rtl', e.target.checked)}
+                      className="mr-2"
+                    />
+                    <span className="text-sm text-gray-700 dark:text-gray-300">
+                      اتجاه النص من اليمين لليسار (RTL)
+                    </span>
+                  </label>
+                  
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={settings.theme.darkMode}
+                      onChange={(e) => updateSetting('theme', 'darkMode', e.target.checked)}
+                      className="mr-2"
+                    />
+                    <span className="text-sm text-gray-700 dark:text-gray-300">
+                      الوضع المظلم افتراضياً
+                    </span>
+                  </label>
+                </div>
               </div>
             </div>
           )}
 
-          {/* Advanced Settings Tab */}
-          {activeTab === 'advanced' && (
-            <div className="space-y-6">
-              <h2 className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>الإعدادات المتقدمة</h2>
-
-              {/* SEO Settings */}
-              <div className="space-y-4">
-                <h3 className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>تحسين محركات البحث (SEO)</h3>
-
-                <div>
-                  <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                    الكلمات المفتاحية (مفصولة بفواصل)
-                  </label>
-                  <textarea
-                    value={formData.metaKeywords}
-                    onChange={(e) => setFormData({ ...formData, metaKeywords: e.target.value })}
-                    rows={3}
-                    className={`w-full px-4 py-3 rounded-xl border ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} resize-none`}
-                    placeholder="خدمات مالية, محافظ رقمية, تحويلات دولية, KYC Trust"
-                  />
-                </div>
-
-                <div>
-                  <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                    وصف الموقع لمحركات البحث
-                  </label>
-                  <textarea
-                    value={formData.metaDescription}
-                    onChange={(e) => setFormData({ ...formData, metaDescription: e.target.value })}
-                    rows={3}
-                    className={`w-full px-4 py-3 rounded-xl border ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} resize-none`}
-                    placeholder="منصة KYCtrust الرائدة في تقديم الخدمات المالية الرقمية الآمنة والموثوقة"
-                  />
-                </div>
-              </div>
-
-              {/* Maintenance Mode */}
-              <div className={`p-6 rounded-xl border ${theme === 'dark' ? 'bg-gray-700 border-gray-600' : 'bg-yellow-50 border-yellow-200'}`}>
-                <h3 className={`text-lg font-semibold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>وضع الصيانة</h3>
-
-                <div className="flex items-center space-x-reverse space-x-3 mb-4">
+          {/* Features Tab */}
+          {activeTab === 'features' && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {Object.entries(settings.features).map(([key, value]) => (
+                <label key={key} className="flex items-center">
                   <input
                     type="checkbox"
-                    id="maintenanceMode"
-                    checked={formData.maintenanceMode}
-                    onChange={(e) => setFormData({ ...formData, maintenanceMode: e.target.checked })}
-                    className="h-4 w-4 text-yellow-600 focus:ring-yellow-500 border-gray-300 rounded"
+                    checked={value}
+                    onChange={(e) => updateSetting('features', key, e.target.checked)}
+                    className="mr-3"
                   />
-                  <label htmlFor="maintenanceMode" className={`font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                    تفعيل وضع الصيانة
+                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                    {key === 'enableRegistration' && 'تفعيل التسجيل'}
+                    {key === 'enableComments' && 'تفعيل التعليقات'}
+                    {key === 'enableNotifications' && 'تفعيل الإشعارات'}
+                    {key === 'enableAnalytics' && 'تفعيل التحليلات'}
+                    {key === 'enableMultiLanguage' && 'تفعيل تعدد اللغات'}
+                    {key === 'enableDarkMode' && 'تفعيل الوضع المظلم'}
+                  </span>
+                </label>
+              ))}
+            </div>
+          )}
+
+          {/* Security Tab */}
+          {activeTab === 'security' && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    عدد محاولات تسجيل الدخول المسموحة
                   </label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="10"
+                    value={settings.security.maxLoginAttempts}
+                    onChange={(e) => updateSetting('security', 'maxLoginAttempts', parseInt(e.target.value))}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg
+                             bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                  />
                 </div>
-
-                {formData.maintenanceMode && (
-                  <div>
-                    <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                      رسالة الصيانة
-                    </label>
-                    <textarea
-                      value={formData.maintenanceMessage}
-                      onChange={(e) => setFormData({ ...formData, maintenanceMessage: e.target.value })}
-                      rows={3}
-                      className={`w-full px-4 py-3 rounded-xl border ${theme === 'dark' ? 'bg-gray-600 border-gray-500 text-white' : 'bg-white border-gray-300 text-gray-900'} resize-none`}
-                      placeholder="الموقع تحت الصيانة حالياً، سنعود قريباً..."
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    مهلة انتهاء الجلسة (دقيقة)
+                  </label>
+                  <input
+                    type="number"
+                    min="5"
+                    max="1440"
+                    value={settings.security.sessionTimeout}
+                    onChange={(e) => updateSetting('security', 'sessionTimeout', parseInt(e.target.value))}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg
+                             bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                  />
+                </div>
+              </div>
+              
+              <div className="space-y-4">
+                {Object.entries(settings.security).filter(([key]) => typeof settings.security[key as keyof typeof settings.security] === 'boolean').map(([key, value]) => (
+                  <label key={key} className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={value as boolean}
+                      onChange={(e) => updateSetting('security', key, e.target.checked)}
+                      className="mr-3"
                     />
-                  </div>
-                )}
+                    <span className="text-sm text-gray-700 dark:text-gray-300">
+                      {key === 'enableCaptcha' && 'تفعيل الكابتشا'}
+                      {key === 'enableTwoFactor' && 'تفعيل المصادقة الثنائية'}
+                      {key === 'enableSSL' && 'تفعيل الاتصال الآمن SSL'}
+                    </span>
+                  </label>
+                ))}
               </div>
             </div>
           )}
-        </div>
-      </div>
 
-      {/* Preview Section */}
-      <div className={`rounded-xl border p-6 ${theme === 'dark' ? 'bg-gradient-to-br from-gray-800 to-blue-900/20 border-gray-700' : 'bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-100'}`}>
-        <h2 className={`text-lg font-semibold mb-4 ${theme === 'dark' ? 'text-white' : 'text-blue-900'}`}>معاينة مباشرة</h2>
+          {/* Notifications Tab */}
+          {activeTab === 'notifications' && (
+            <div className="space-y-4">
+              {Object.entries(settings.notifications).map(([key, value]) => (
+                <label key={key} className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={value}
+                    onChange={(e) => updateSetting('notifications', key, e.target.checked)}
+                    className="mr-3"
+                  />
+                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                    {key === 'emailNotifications' && 'إشعارات البريد الإلكتروني'}
+                    {key === 'smsNotifications' && 'إشعارات الرسائل النصية'}
+                    {key === 'whatsappNotifications' && 'إشعارات الواتساب'}
+                    {key === 'newOrderNotification' && 'إشعار الطلبات الجديدة'}
+                    {key === 'paymentNotification' && 'إشعار المدفوعات'}
+                  </span>
+                </label>
+              ))}
+            </div>
+          )}
 
-        <div className={`rounded-lg p-6 ${theme === 'dark' ? 'bg-gray-800 border border-gray-700' : 'bg-white'}`}>
-          {/* Logo Preview */}
-          {activeTab === 'logo' && formData.logoUrl && (
-            <div className="flex items-center space-x-reverse space-x-4 mb-6">
-              <img src={formData.logoUrl} alt="Logo Preview" className="h-12 w-auto" />
+          {/* Maintenance Tab */}
+          {activeTab === 'maintenance' && (
+            <div className="space-y-6">
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  checked={settings.maintenance.enabled}
+                  onChange={(e) => updateSetting('maintenance', 'enabled', e.target.checked)}
+                  className="mr-3"
+                />
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  تفعيل وضع الصيانة
+                </span>
+              </div>
+              
               <div>
-                <h3 className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>KYCtrust</h3>
-                <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>منصة الخدمات المالية</p>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  رسالة الصيانة
+                </label>
+                <textarea
+                  value={settings.maintenance.message}
+                  onChange={(e) => updateSetting('maintenance', 'message', e.target.value)}
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg
+                           bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                />
               </div>
-            </div>
-          )}
-
-          {/* General Preview */}
-          {activeTab === 'general' && (
-            <>
-              <h1 className={`text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                {formData.title}
-              </h1>
-              <p className={`mb-6 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-                {formData.description}
-              </p>
-
-              <div className={`border rounded-lg p-4 ${theme === 'dark' ? 'bg-yellow-900/20 border-yellow-700' : 'bg-yellow-50 border-yellow-200'}`}>
-                <p className={`text-sm ${theme === 'dark' ? 'text-yellow-300' : 'text-yellow-800'}`}>
-                  <strong>تنبيه:</strong> {formData.orderNotice}
-                </p>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  عناوين IP المسموحة (مفصولة بفواصل)
+                </label>
+                <input
+                  type="text"
+                  value={settings.maintenance.allowedIPs.join(', ')}
+                  onChange={(e) => updateSetting('maintenance', 'allowedIPs', e.target.value.split(',').map(ip => ip.trim()))}
+                  placeholder="192.168.1.1, 10.0.0.1"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg
+                           bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                />
               </div>
-            </>
-          )}
-
-          {/* Colors Preview */}
-          {activeTab === 'colors' && (
-            <div className="space-y-4">
-              <h3 className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`} style={{ fontFamily: formData.fontFamily }}>عينة النص بالخط المحدد</h3>
-              <div className="flex space-x-reverse space-x-3">
-                <button
-                  className="px-6 py-3 rounded-xl text-white font-semibold"
-                  style={{ backgroundColor: formData.primaryColor }}
-                >
-                  زر ��ساسي
-                </button>
-                <button
-                  className="px-6 py-3 rounded-xl text-white font-semibold"
-                  style={{ backgroundColor: formData.secondaryColor }}
-                >
-                  زر ثانوي
-                </button>
-                <button
-                  className="px-6 py-3 rounded-xl text-white font-semibold"
-                  style={{ backgroundColor: formData.accentColor }}
-                >
-                  زر إبراز
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Advanced Preview */}
-          {activeTab === 'advanced' && (
-            <div className="space-y-4">
-              {formData.maintenanceMode && (
-                <div className={`p-4 rounded-lg border ${theme === 'dark' ? 'bg-red-900/20 border-red-700' : 'bg-red-50 border-red-200'}`}>
-                  <h3 className={`font-semibold mb-2 ${theme === 'dark' ? 'text-red-300' : 'text-red-800'}`}>وضع الصيانة مفعل</h3>
-                  <p className={`text-sm ${theme === 'dark' ? 'text-red-400' : 'text-red-700'}`}>
-                    {formData.maintenanceMessage || 'الموقع تحت الصيانة حالياً'}
-                  </p>
+              
+              {settings.maintenance.enabled && (
+                <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+                  <div className="flex items-center">
+                    <AlertCircle className="h-5 w-5 text-yellow-600 dark:text-yellow-400 mr-2" />
+                    <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                      وضع الصيانة مفعل. الزوار سيرون رسالة الصيانة بدلاً من الموقع.
+                    </p>
+                  </div>
                 </div>
               )}
-              <div className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                <strong>الكلمات المفتاحية:</strong> {formData.metaKeywords || 'لم يتم تحديدها'}
-              </div>
             </div>
           )}
         </div>
@@ -599,5 +902,3 @@ const SiteSettingsManager: React.FC = () => {
     </div>
   );
 };
-
-export default SiteSettingsManager;
