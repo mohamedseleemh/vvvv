@@ -11,8 +11,9 @@ import toast from 'react-hot-toast';
 const LandingPageCustomizer: React.FC = () => {
   const { customization, loading, error, updateHeroSection, updateGlobalSettings, refreshCustomization } = useCustomization();
   const { theme } = useTheme();
-  const [activeTab, setActiveTab] = useState<'hero' | 'global' | 'sections' | 'features'>('hero');
+  const [activeTab, setActiveTab] = useState<'hero' | 'global' | 'sections' | 'features' | 'builder' | 'code'>('hero');
   const [isPreviewMode, setIsPreviewMode] = useState(false);
+  const [isLivePreviewOpen, setIsLivePreviewOpen] = useState(false);
 
   const [heroForm, setHeroForm] = useState(customization?.hero || {
     title: '',
@@ -79,7 +80,7 @@ const LandingPageCustomizer: React.FC = () => {
   ];
 
   if (loading) {
-    return <LoadingSpinner size="lg" text="جاري تحميل إعدادات التخ��يص..." />;
+    return <LoadingSpinner size="lg" text="جاري تحميل إعدادات التخصيص..." />;
   }
 
   if (error) {
@@ -282,7 +283,7 @@ const LandingPageCustomizer: React.FC = () => {
                         ? 'bg-gray-700 border-gray-600 text-white'
                         : 'bg-white border-gray-300 text-gray-900'
                     }`}
-                    placeholder="منصة رائدة في ا��خدمات المالية"
+                    placeholder="منصة رائدة في الخدمات المالية"
                   />
                 </div>
 
@@ -380,7 +381,7 @@ const LandingPageCustomizer: React.FC = () => {
                   className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg transition-all duration-300 flex items-center justify-center space-x-reverse space-x-2"
                 >
                   <Save className="h-5 w-5" />
-                  <span>حفظ إعدادات القسم الرئيسي</span>
+                  <span>حفظ إعدادا�� القسم الرئيسي</span>
                 </button>
               </div>
             </div>
