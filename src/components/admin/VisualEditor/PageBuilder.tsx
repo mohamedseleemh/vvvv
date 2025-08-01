@@ -229,18 +229,26 @@ const PageBuilder: React.FC = () => {
     }
   }, [elements, currentTheme, customization, addPageElement]);
 
-  const updateElement = useCallback((id: string, updates: Partial<PageElement>) => {
-    setElements(prev => prev.map(el => 
-      el.id === id ? { ...el, ...updates } : el
-    ));
-  }, []);
-
-  const deleteElement = useCallback((id: string) => {
-    setElements(prev => prev.filter(el => el.id !== id));
-    if (selectedElement === id) {
-      setSelectedElement(null);
+  const updateElement = useCallback(async (id: string, updates: Partial<PageElement>) => {
+    try {
+      await updatePageElement(id, updates);
+      toast.success('تم تحديث العنصر بنجاح');
+    } catch (error) {
+      toast.error('فشل في تحديث العنصر');
     }
-  }, [selectedElement]);
+  }, [updatePageElement]);
+
+  const deleteElement = useCallback(async (id: string) => {
+    try {
+      await deletePageElement(id);
+      if (selectedElement === id) {
+        setSelectedElement(null);
+      }
+      toast.success('تم حذف العنصر بنجاح');
+    } catch (error) {
+      toast.error('فشل في حذف العنصر');
+    }
+  }, [selectedElement, deletePageElement]);
 
   const duplicateElement = useCallback((id: string) => {
     const element = elements.find(el => el.id === id);
