@@ -55,7 +55,17 @@ export interface PageTheme {
 
 const PageBuilder: React.FC = () => {
   const { theme } = useTheme();
-  const [elements, setElements] = useState<PageElement[]>([]);
+  const {
+    customization,
+    updatePageElements,
+    addPageElement,
+    updatePageElement,
+    deletePageElement,
+    publishPage,
+    loading
+  } = useCustomization();
+
+  const [elements, setElements] = useState<PageElement[]>(customization.pageElements || []);
   const [selectedElement, setSelectedElement] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
   const [isPreviewMode, setIsPreviewMode] = useState(false);
@@ -63,6 +73,11 @@ const PageBuilder: React.FC = () => {
   const [history, setHistory] = useState<PageElement[][]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const canvasRef = useRef<HTMLDivElement>(null);
+
+  // Sync elements with customization context
+  React.useEffect(() => {
+    setElements(customization.pageElements || []);
+  }, [customization.pageElements]);
 
   // Built-in themes
   const themes: PageTheme[] = [
