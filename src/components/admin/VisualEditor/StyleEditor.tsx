@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { 
-  Palette, Type, Layout, Spacing, BorderAll, Eye, 
+import {
+  Palette, Type, Layout, Spacing, Square, Eye,
   ChevronDown, ChevronRight, Settings, Brush, Box
 } from 'lucide-react';
 import { PageElement, PageTheme } from './PageBuilder';
