@@ -56,7 +56,7 @@ const AdminPanel: React.FC = () => {
       case 'settings':
         return <SiteSettingsManager />;
       case 'testing':
-        return <IntegrationTester />;
+        return <div className="text-center p-8 text-gray-500">جاري تطوير هذه الميزة</div>;
       default:
         return <Dashboard />;
     }
