@@ -176,7 +176,7 @@ const LandingPage: React.FC = () => {
       icon: Award,
       title: language === 'ar' ? 'موثوقية عالية' : 'High Reliability',
       description: language === 'ar' 
-        ? 'ضمان الجودة وإرجاع الأموال في حالة عدم الرضا' 
+        ? 'ضمان الجودة وإرجاع الأموال في حالة عد�� الرضا' 
         : 'Quality guarantee and money back in case of dissatisfaction',
       color: 'from-green-500 to-green-600',
       benefits: language === 'ar' 
@@ -720,7 +720,7 @@ const LandingPage: React.FC = () => {
                 <p className={`text-lg ${
                   theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
                 }`}>
-                  {language === 'ar' ? 'لا توجد خدمات متاحة حالياً' : 'No services available at the moment'}
+                  {language === 'ar' ? 'لا توجد خدمات متاحة ح��لياً' : 'No services available at the moment'}
                 </p>
               </div>
             )}
@@ -966,6 +966,9 @@ const LandingPage: React.FC = () => {
         </div>
       </section>
 
+      {/* Custom Elements */}
+      <CustomElementsRenderer />
+
       {/* FAQ Section */}
       <section id="faq" className="py-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -1016,7 +1019,7 @@ const LandingPage: React.FC = () => {
                 a: 'نقبل الدفع عبر فودافون كاش، USDT، وطرق دفع أخرى. يمكنك مراجعة جميع الطرق المتاحة في قسم طرق الدفع.'
               },
               {
-                q: 'هل تقدمون ضمان على الخدمات؟',
+                q: 'هل تقدمون ضمان ع��ى الخدمات؟',
                 a: 'نعم، نحن نقدم ضمان استرداد الأموال في حالة عدم تنفيذ الخدمة كما هو متفق عليه.'
               },
               {
@@ -1115,7 +1118,7 @@ const LandingPage: React.FC = () => {
                 theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
               }`}>
                 {language === 'ar' 
-                  ? 'نحن نقدم خدمات مالية رقمية آمنة وموثوقة مع أعلى معايير الجودة والحماية لعملائنا الكرام.'
+                  ? 'نحن نقدم خدمات مالية رقمية آمنة وموثوقة مع أعلى معايير الجود�� والحماية لعملائنا الكرام.'
                   : 'We provide secure and reliable digital financial services with the highest standards of quality and protection for our valued customers.'
                 }
               </p>
