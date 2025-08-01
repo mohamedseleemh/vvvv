@@ -202,7 +202,7 @@ const PageBuilder: React.FC = () => {
     }
   ];
 
-  const addElement = useCallback((template: typeof componentTemplates[0]) => {
+  const addElement = useCallback(async (template: typeof componentTemplates[0]) => {
     const newElement: PageElement = {
       id: `element-${Date.now()}`,
       type: template.type,
@@ -210,18 +210,24 @@ const PageBuilder: React.FC = () => {
       size: { width: 800, height: 400 },
       content: template.defaultContent,
       styles: {
-        backgroundColor: currentTheme?.colors.background || '#ffffff',
+        backgroundColor: currentTheme?.colors.background || customization.globalSettings.primaryColor || '#ffffff',
         textColor: currentTheme?.colors.text || '#000000',
         borderRadius: 8,
         padding: 24,
         margin: 16
       },
-      visible: true
+      visible: true,
+      order: elements.length
     };
 
-    setElements(prev => [...prev, newElement]);
-    saveToHistory([...elements, newElement]);
-  }, [elements, currentTheme]);
+    try {
+      await addPageElement(newElement);
+      saveToHistory([...elements, newElement]);
+      toast.success('تم إضافة العنصر بنجاح');
+    } catch (error) {
+      toast.error('فشل في إضافة العنصر');
+    }
+  }, [elements, currentTheme, customization, addPageElement]);
 
   const updateElement = useCallback((id: string, updates: Partial<PageElement>) => {
     setElements(prev => prev.map(el => 
